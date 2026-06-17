@@ -188,7 +188,7 @@ export default function AboutPage() {
           </div>
           <div className="mt-4 flex justify-center">
             <img
-              src="/images/sugar-effects.png"
+              src="https://i.imgur.com/Swu6sbv.png"
               alt="Efeitos do açúcar no corpo"
               className="max-h-72 rounded-3xl object-contain shadow-xl"
             />
