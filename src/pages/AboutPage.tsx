@@ -106,7 +106,7 @@ export default function AboutPage() {
               </div>
               <div className="flex items-center justify-center">
                 <img
-                  src="/images/hero-sugar.png"
+                  src="https://i.imgur.com/5iNGL2p.png"
                   alt="Ilustração do açúcar"
                   className="max-h-64 rounded-2xl object-contain"
                 />
