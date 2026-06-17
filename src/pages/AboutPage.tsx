@@ -235,7 +235,7 @@ export default function AboutPage() {
           </h2>
           <div className="mb-6 flex justify-center">
             <img
-              src="/images/healthy-alternatives.png"
+              src="https://i.imgur.com/KdmoYTE.png"
               alt="Alternativas saudáveis"
               className="max-h-64 rounded-3xl object-contain shadow-lg"
             />
