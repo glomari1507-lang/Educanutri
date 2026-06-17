@@ -127,7 +127,7 @@ export default function AboutPage() {
           </h2>
           <div className="mb-5 flex justify-center">
             <img
-              src="/images/sugar-types.png"
+              src="https://i.imgur.com/A1mEsMi.png"
               alt="Tipos de açúcar"
               className="max-h-56 rounded-3xl object-contain shadow-lg"
             />
