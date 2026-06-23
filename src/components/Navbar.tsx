@@ -16,15 +16,14 @@ export default function Navbar() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
       const { data } = await supabase.auth.getUser();
       setUser(data.user);
       if (data.user) {
-        // Busca o perfil (avatar, username)
         const { data: profileData } = await supabase
           .from('profiles')
           .select('avatar_url, username')
@@ -47,7 +46,6 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 border-b-2 border-purple-200 bg-white/90 shadow-sm backdrop-blur-md">
       <div className="mx-auto max-w-5xl px-4">
         <div className="flex h-14 items-center justify-between">
-          {/* Logo */}
           <button
             onClick={() => navigate("/")}
             className="flex items-center gap-2 font-['Fredoka_One'] text-xl text-purple-700 hover:text-pink-600"
@@ -56,7 +54,6 @@ export default function Navbar() {
             <span>SugarAlert</span>
           </button>
 
-          {/* Desktop */}
           <div className="hidden items-center gap-1 md:flex">
             {links.map((link) => (
               <button
@@ -80,11 +77,17 @@ export default function Navbar() {
                 >
                   <span className="text-xl">{profile?.avatar_url || '👤'}</span>
                   <span className="font-['Nunito'] text-sm font-bold text-purple-700">
-                    {profile?.username || user.email}
+                    {profile?.username || user.email?.split('@')[0] || 'Usuário'}
                   </span>
                 </button>
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white shadow-xl border border-gray-100 py-2">
+                    <button
+                      onClick={() => { navigate('/perfil'); setDropdownOpen(false); }}
+                      className="flex w-full items-center gap-2 px-4 py-2 font-['Nunito'] text-sm font-bold text-gray-700 hover:bg-purple-50"
+                    >
+                      👤 Meu Perfil
+                    </button>
                     <button
                       onClick={() => { navigate('/amigos'); setDropdownOpen(false); }}
                       className="flex w-full items-center gap-2 px-4 py-2 font-['Nunito'] text-sm font-bold text-gray-700 hover:bg-purple-50"
@@ -110,7 +113,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile (hamburger) - mantenha o mesmo do código anterior, mas com as opções de login/sair alinhadas */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 rounded-xl bg-purple-100 md:hidden"
@@ -138,12 +140,20 @@ export default function Navbar() {
               </button>
             ))}
             {user ? (
-              <button
-                onClick={() => { handleLogout(); setMenuOpen(false); }}
-                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 font-['Nunito'] text-sm font-bold text-red-600"
-              >
-                🚪 Sair
-              </button>
+              <>
+                <button
+                  onClick={() => { navigate('/perfil'); setMenuOpen(false); }}
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 font-['Nunito'] text-sm font-bold text-gray-700"
+                >
+                  👤 Meu Perfil
+                </button>
+                <button
+                  onClick={() => { handleLogout(); setMenuOpen(false); }}
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 font-['Nunito'] text-sm font-bold text-red-600"
+                >
+                  🚪 Sair
+                </button>
+              </>
             ) : (
               <button
                 onClick={() => { navigate('/login'); setMenuOpen(false); }}
