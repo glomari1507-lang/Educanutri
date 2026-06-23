@@ -19,14 +19,11 @@ export default function ProfilePage() {
         return;
       }
       setUser(data.user);
-
-      // Busca perfil existente
       const { data: profileData } = await supabase
         .from('profiles')
         .select('username, avatar_url')
         .eq('id', data.user.id)
         .single();
-
       if (profileData) {
         setUsername(profileData.username || '');
         setAvatar(profileData.avatar_url || '🦊');
@@ -42,23 +39,46 @@ export default function ProfilePage() {
       alert('Digite um nome para seu perfil!');
       return;
     }
-
     setLoading(true);
-    const { error } = await supabase
-      .from('profiles')
-      .upsert({
-        id: user.id,
-        username: username.trim(),
-        avatar_url: avatar
-      });
 
-    if (error) {
-      alert('Erro ao salvar perfil: ' + error.message);
-    } else {
-      alert('Perfil salvo com sucesso! 🎉');
-      navigate('/');
+    try {
+      // --- TENTA UPDATE ---
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ username: username.trim(), avatar_url: avatar })
+        .eq('id', user.id);
+
+      if (updateError) {
+        console.error('Erro no UPDATE:', updateError);
+        alert('Erro no UPDATE: ' + updateError.message);
+        return;
+      }
+
+      // Verifica se salvou
+      const { data: check, error: checkError } = await supabase
+        .from('profiles')
+        .select('username, avatar_url')
+        .eq('id', user.id)
+        .single();
+
+      if (checkError) {
+        console.error('Erro ao verificar:', checkError);
+        alert('Perfil salvo, mas erro ao verificar: ' + checkError.message);
+        return;
+      }
+
+      if (check?.username === username.trim()) {
+        alert('Perfil salvo com sucesso! 🎉');
+        navigate('/');
+      } else {
+        alert('Perfil salvo, mas nome não atualizou. Tente novamente.');
+      }
+
+    } catch (error: any) {
+      alert('Erro: ' + error.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -67,9 +87,7 @@ export default function ProfilePage() {
         <div className="text-center mb-6">
           <div className="text-6xl mb-2">{avatar}</div>
           <h1 className="font-['Fredoka_One'] text-2xl text-gray-800">Meu Perfil</h1>
-          <p className="text-gray-500 font-['Nunito'] text-sm">
-            {user?.email}
-          </p>
+          <p className="text-gray-500 font-['Nunito'] text-sm">{user?.email}</p>
         </div>
 
         <div className="mb-6">
@@ -82,9 +100,7 @@ export default function ProfilePage() {
                 key={av}
                 onClick={() => setAvatar(av)}
                 className={`text-3xl p-2 rounded-xl transition-all ${
-                  avatar === av
-                    ? "bg-purple-200 ring-2 ring-purple-500 scale-110"
-                    : "bg-gray-100 hover:bg-purple-100"
+                  avatar === av ? "bg-purple-200 ring-2 ring-purple-500 scale-110" : "bg-gray-100 hover:bg-purple-100"
                 }`}
               >
                 {av}
@@ -115,10 +131,7 @@ export default function ProfilePage() {
           {loading ? 'Salvando...' : '💾 Salvar Perfil'}
         </button>
 
-        <button
-          onClick={() => navigate('/')}
-          className="w-full mt-3 text-gray-500 font-['Nunito'] text-sm font-bold hover:text-purple-600"
-        >
+        <button onClick={() => navigate('/')} className="w-full mt-3 text-gray-500 font-['Nunito'] text-sm font-bold hover:text-purple-600">
           ← Voltar
         </button>
       </div>
