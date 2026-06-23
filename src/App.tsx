@@ -8,6 +8,7 @@ import MythsPage from "./pages/MythsPage";
 import QuizPage from "./pages/QuizPage";
 import LoginPage from "./pages/LoginPage";
 import FriendsPage from "./pages/FriendsPage";
+import ProfilePage from "./pages/ProfilePage";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
             <Route path="/quiz" element={<QuizPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/amigos" element={<FriendsPage />} />
+            <Route path="/perfil" element={<ProfilePage />} />
           </Routes>
         </main>
         <Footer />
