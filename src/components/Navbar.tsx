@@ -16,31 +16,47 @@ export default function Navbar() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser();
       setUser(data.user);
-    });
+      if (data.user) {
+        // Busca o perfil (avatar, username)
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('avatar_url, username')
+          .eq('id', data.user.id)
+          .single();
+        setProfile(profileData);
+      }
+    };
+    getUser();
   }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    navigate("/");
+    setProfile(null);
+    navigate('/');
   };
 
   return (
     <nav className="sticky top-0 z-50 border-b-2 border-purple-200 bg-white/90 shadow-sm backdrop-blur-md">
       <div className="mx-auto max-w-5xl px-4">
         <div className="flex h-14 items-center justify-between">
+          {/* Logo */}
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 font-['Fredoka_One'] text-xl text-purple-700 hover:text-pink-600 transition-colors"
+            className="flex items-center gap-2 font-['Fredoka_One'] text-xl text-purple-700 hover:text-pink-600"
           >
             <span className="text-2xl">🍬</span>
             <span>SugarAlert</span>
           </button>
 
+          {/* Desktop */}
           <div className="hidden items-center gap-1 md:flex">
             {links.map((link) => (
               <button
@@ -55,24 +71,46 @@ export default function Navbar() {
                 {link.label}
               </button>
             ))}
+
             {user ? (
-              <button
-                onClick={handleLogout}
-                className="rounded-xl bg-red-500 px-3 py-1.5 font-['Nunito'] text-sm font-bold text-white hover:bg-red-600"
-              >
-                Sair
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 rounded-full bg-purple-100 px-3 py-1.5 hover:bg-purple-200"
+                >
+                  <span className="text-xl">{profile?.avatar_url || '👤'}</span>
+                  <span className="font-['Nunito'] text-sm font-bold text-purple-700">
+                    {profile?.username || user.email}
+                  </span>
+                </button>
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white shadow-xl border border-gray-100 py-2">
+                    <button
+                      onClick={() => { navigate('/amigos'); setDropdownOpen(false); }}
+                      className="flex w-full items-center gap-2 px-4 py-2 font-['Nunito'] text-sm font-bold text-gray-700 hover:bg-purple-50"
+                    >
+                      👥 Amigos
+                    </button>
+                    <button
+                      onClick={() => { handleLogout(); setDropdownOpen(false); }}
+                      className="flex w-full items-center gap-2 px-4 py-2 font-['Nunito'] text-sm font-bold text-red-600 hover:bg-red-50"
+                    >
+                      🚪 Sair
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <button
-                onClick={() => navigate("/login")}
-                className="rounded-xl bg-purple-600 px-3 py-1.5 font-['Nunito'] text-sm font-bold text-white hover:bg-purple-700"
+                onClick={() => navigate('/login')}
+                className="rounded-xl bg-purple-600 px-4 py-1.5 font-['Nunito'] text-sm font-bold text-white hover:bg-purple-700"
               >
                 Login
               </button>
             )}
           </div>
 
-          {/* Mobile */}
+          {/* Mobile (hamburger) - mantenha o mesmo do código anterior, mas com as opções de login/sair alinhadas */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 rounded-xl bg-purple-100 md:hidden"
@@ -104,11 +142,11 @@ export default function Navbar() {
                 onClick={() => { handleLogout(); setMenuOpen(false); }}
                 className="flex w-full items-center gap-3 rounded-xl px-4 py-3 font-['Nunito'] text-sm font-bold text-red-600"
               >
-                Sair
+                🚪 Sair
               </button>
             ) : (
               <button
-                onClick={() => { navigate("/login"); setMenuOpen(false); }}
+                onClick={() => { navigate('/login'); setMenuOpen(false); }}
                 className="flex w-full items-center gap-3 rounded-xl px-4 py-3 font-['Nunito'] text-sm font-bold text-purple-600"
               >
                 Login
