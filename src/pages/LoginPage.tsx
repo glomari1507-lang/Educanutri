@@ -10,6 +10,11 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
 
   const handleAuth = async () => {
+    if (!email || !password) {
+      alert('Preencha email e senha!');
+      return;
+    }
+
     setLoading(true);
     try {
       if (isSignUp) {
@@ -29,7 +34,8 @@ export default function LoginPage() {
           password,
         });
         if (error) throw error;
-        navigate('/');
+        // Redireciona para o perfil após o login
+        navigate('/perfil');
       }
     } catch (error: any) {
       alert(error.message);
@@ -84,4 +90,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-              }
+}
