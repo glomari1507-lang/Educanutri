@@ -25,79 +25,97 @@ export default function FriendsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data.user) {
+      try {
+        const { data } = await supabase.auth.getUser();
+        if (!data.user) {
+          navigate('/login');
+          return;
+        }
         setUser(data.user);
+
         await Promise.all([
           loadFriends(data.user.id),
           loadFriendsRanking(data.user.id),
           loadPendingRequests(data.user.id)
         ]);
-      } else {
-        navigate('/login');
+      } catch (err) {
+        console.error('Erro ao carregar dados:', err);
+        setError('Erro ao carregar amigos. Tente novamente.');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     loadData();
   }, []);
 
   const loadFriends = async (userId: string) => {
-    // Busca amigos onde o usuário é o user_id
-    const { data, error } = await supabase
-      .from('friends')
-      .select(`
-        friend_id,
-        profiles!friends_friend_id_fkey (id, username, avatar_url, score)
-      `)
-      .eq('user_id', userId)
-      .eq('status', 'accepted');
+    try {
+      const { data, error } = await supabase
+        .from('friends')
+        .select(`
+          friend_id,
+          profiles!friends_friend_id_fkey (id, username, avatar_url, score)
+        `)
+        .eq('user_id', userId)
+        .eq('status', 'accepted');
+      if (error) throw error;
 
-    if (error) console.error(error);
+      const { data: data2, error: error2 } = await supabase
+        .from('friends')
+        .select(`
+          user_id,
+          profiles!friends_user_id_fkey (id, username, avatar_url, score)
+        `)
+        .eq('friend_id', userId)
+        .eq('status', 'accepted');
+      if (error2) throw error2;
 
-    // Busca amigos onde o usuário é o friend_id
-    const { data: data2, error: error2 } = await supabase
-      .from('friends')
-      .select(`
-        user_id,
-        profiles!friends_user_id_fkey (id, username, avatar_url, score)
-      `)
-      .eq('friend_id', userId)
-      .eq('status', 'accepted');
-
-    if (error2) console.error(error2);
-
-    const friends = data?.map(f => f.profiles).filter(Boolean) || [];
-    const friends2 = data2?.map(f => f.profiles).filter(Boolean) || [];
-    const all = [...friends, ...friends2];
-    setFriendsList(all);
+      const friends = data?.map(f => f.profiles).filter(Boolean) || [];
+      const friends2 = data2?.map(f => f.profiles).filter(Boolean) || [];
+      setFriendsList([...friends, ...friends2]);
+    } catch (err) {
+      console.error('Erro ao carregar amigos:', err);
+      setError('Erro ao carregar lista de amigos.');
+    }
   };
 
   const loadFriendsRanking = async (userId: string) => {
-    const data = await getFriendsRanking(userId);
-    setFriendsRanking(data);
+    try {
+      const data = await getFriendsRanking(userId);
+      setFriendsRanking(data);
+    } catch (err) {
+      console.error('Erro ao carregar ranking:', err);
+      setError('Erro ao carregar ranking de amigos.');
+    }
   };
 
   const loadPendingRequests = async (userId: string) => {
-    const data = await getPendingRequests(userId);
-    setPendingRequests(data);
+    try {
+      const data = await getPendingRequests(userId);
+      setPendingRequests(data);
+    } catch (err) {
+      console.error('Erro ao carregar solicitações:', err);
+      setError('Erro ao carregar solicitações pendentes.');
+    }
   };
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     try {
       const results = await searchUsers(searchQuery);
-      // Filtra o próprio usuário e quem já é amigo
       const friendIds = friendsList.map(f => f.id);
-      const filtered = results.filter(r => 
-        r.id !== user.id && !friendIds.includes(r.id)
-      );
+      const filtered = results.filter(r => r.id !== user.id && !friendIds.includes(r.id));
       setSearchResults(filtered);
-    } catch (error) {
-      console.error(error);
-      alert('Erro ao buscar usuários');
+      if (filtered.length === 0) {
+        alert('Nenhum usuário encontrado com esse nome.');
+      }
+    } catch (err) {
+      console.error('Erro na busca:', err);
+      alert('Erro ao buscar usuários.');
     }
   };
 
@@ -107,8 +125,8 @@ export default function FriendsPage() {
       alert('Solicitação enviada! ✅');
       setSearchResults([]);
       setSearchQuery('');
-    } catch (error: any) {
-      alert('Erro: ' + error.message);
+    } catch (err: any) {
+      alert('Erro: ' + err.message);
     }
   };
 
@@ -121,8 +139,8 @@ export default function FriendsPage() {
         loadFriendsRanking(user.id)
       ]);
       alert('Amigo adicionado! 🎉');
-    } catch (error: any) {
-      alert('Erro: ' + error.message);
+    } catch (err: any) {
+      alert('Erro: ' + err.message);
     }
   };
 
@@ -132,7 +150,32 @@ export default function FriendsPage() {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50">
+        <div className="text-center">
+          <div className="text-4xl animate-spin mb-4">⏳</div>
+          <p className="text-gray-500 font-['Nunito']">Carregando amigos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-4">
+        <div className="bg-white rounded-3xl p-8 shadow-xl text-center max-w-md">
+          <div className="text-5xl mb-4">⚠️</div>
+          <h2 className="font-['Fredoka_One'] text-xl text-red-600 mb-2">Ops!</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-purple-600 text-white px-6 py-2 rounded-xl font-bold"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -148,7 +191,6 @@ export default function FriendsPage() {
           </button>
         </div>
 
-        {/* Lista de amigos */}
         <div className="bg-white rounded-3xl p-6 shadow-lg mb-6">
           <h2 className="font-['Fredoka_One'] text-xl text-gray-700 mb-4">
             👫 Meus Amigos ({friendsList.length})
@@ -168,7 +210,6 @@ export default function FriendsPage() {
           )}
         </div>
 
-        {/* Ranking entre amigos */}
         <div className="bg-white rounded-3xl p-6 shadow-lg mb-6">
           <h2 className="font-['Fredoka_One'] text-xl text-gray-700 mb-4">
             🏅 Ranking entre Amigos
@@ -187,7 +228,6 @@ export default function FriendsPage() {
           )}
         </div>
 
-        {/* Buscar amigos */}
         <div className="bg-white rounded-3xl p-6 shadow-lg mb-6">
           <h2 className="font-['Fredoka_One'] text-xl text-gray-700 mb-4">
             🔍 Adicionar Amigos
@@ -227,7 +267,6 @@ export default function FriendsPage() {
           )}
         </div>
 
-        {/* Solicitações pendentes */}
         {pendingRequests.length > 0 && (
           <div className="bg-white rounded-3xl p-6 shadow-lg">
             <h2 className="font-['Fredoka_One'] text-xl text-gray-700 mb-4">
