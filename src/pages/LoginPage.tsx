@@ -34,7 +34,6 @@ export default function LoginPage() {
           password,
         });
         if (error) throw error;
-        // Redireciona para o perfil após o login
         navigate('/perfil');
       }
     } catch (error: any) {
