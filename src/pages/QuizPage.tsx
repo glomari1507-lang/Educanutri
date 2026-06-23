@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { quizQuestions } from "../data/quizData";
+import { supabase } from "../lib/supabase";
 
 type GameState = "register" | "playing" | "result" | "ranking";
 type RankingEntry = { name: string; score: number; date: string; emoji: string };
@@ -48,7 +49,6 @@ export default function QuizPage() {
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Load ranking from localStorage
   useEffect(() => {
     const stored = localStorage.getItem("sugar_quiz_ranking");
     if (stored) {
@@ -60,7 +60,6 @@ export default function QuizPage() {
     }
   }, []);
 
-  // Timer
   useEffect(() => {
     if (gameState === "playing" && !confirmed) {
       setTimeLeft(20);
@@ -76,7 +75,6 @@ export default function QuizPage() {
       }, 1000);
     }
     return () => clearInterval(timerRef.current!);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState, currentQ, confirmed]);
 
   const handleTimeout = () => {
@@ -114,7 +112,18 @@ export default function QuizPage() {
     }
   };
 
-  const finishGame = () => {
+  const finishGame = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ score: score })
+        .eq('id', user.id);
+      if (error) {
+        console.error('Erro ao salvar pontuação no Supabase:', error);
+      }
+    }
+
     const entry: RankingEntry = {
       name: playerName,
       score: score,
@@ -171,7 +180,6 @@ export default function QuizPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-md"
         >
-          {/* Back */}
           <button
             onClick={() => navigate("/")}
             className="mb-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 font-['Nunito'] text-sm font-bold text-gray-600 shadow-md hover:shadow-lg"
@@ -188,7 +196,6 @@ export default function QuizPage() {
               </p>
             </div>
 
-            {/* Rules */}
             <div className="mb-6 rounded-2xl bg-purple-50 p-4">
               <h3 className="mb-3 font-['Fredoka_One'] text-lg text-purple-700">📋 Regras do Jogo</h3>
               <ul className="space-y-1.5">
@@ -208,7 +215,6 @@ export default function QuizPage() {
               </ul>
             </div>
 
-            {/* Avatar */}
             <div className="mb-5">
               <label className="mb-2 block font-['Nunito'] text-sm font-bold text-gray-700">
                 Escolha seu avatar:
@@ -230,7 +236,6 @@ export default function QuizPage() {
               </div>
             </div>
 
-            {/* Name */}
             <div className="mb-6">
               <label className="mb-2 block font-['Nunito'] text-sm font-bold text-gray-700">
                 Seu nome ou apelido:
@@ -264,9 +269,8 @@ export default function QuizPage() {
         </motion.div>
       </div>
     );
-  }
-
-  // Playing Screen
+            }
+    // Playing Screen
   if (gameState === "playing") {
     const timerPct = (timeLeft / 20) * 100;
     const timerColor = timerPct > 60 ? "bg-green-500" : timerPct > 30 ? "bg-yellow-500" : "bg-red-500";
@@ -274,7 +278,6 @@ export default function QuizPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 p-4">
         <div className="mx-auto max-w-2xl">
-          {/* Top bar */}
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2 rounded-2xl bg-white px-4 py-2 shadow-md">
               <span className="text-xl">{playerEmoji}</span>
@@ -285,7 +288,6 @@ export default function QuizPage() {
             </div>
           </div>
 
-          {/* Progress */}
           <div className="mb-4">
             <div className="mb-1 flex justify-between font-['Nunito'] text-xs font-bold text-gray-500">
               <span>Pergunta {currentQ + 1} de {quizQuestions.length}</span>
@@ -294,7 +296,6 @@ export default function QuizPage() {
             <ProgressBar current={currentQ + 1} total={quizQuestions.length} />
           </div>
 
-          {/* Timer */}
           <div className="mb-4">
             <div className="mb-1 flex items-center justify-between">
               <span className="font-['Nunito'] text-xs font-bold text-gray-500">⏱️ Tempo</span>
@@ -311,7 +312,6 @@ export default function QuizPage() {
             </div>
           </div>
 
-          {/* Question Card */}
           <AnimatePresence mode="wait">
             <motion.div
               key={currentQ}
@@ -321,7 +321,6 @@ export default function QuizPage() {
               transition={{ duration: 0.3 }}
               className="rounded-3xl bg-white p-6 shadow-2xl"
             >
-              {/* Category & difficulty */}
               <div className="mb-4 flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-purple-100 px-3 py-1 font-['Nunito'] text-xs font-bold text-purple-700">
                   {q.emoji} {q.category}
@@ -331,12 +330,10 @@ export default function QuizPage() {
                 </span>
               </div>
 
-              {/* Question */}
               <h2 className="mb-6 font-['Nunito'] text-xl font-black leading-snug text-gray-800">
                 {q.question}
               </h2>
 
-              {/* Options */}
               <div className="grid gap-3">
                 {q.options.map((opt) => {
                   let style =
@@ -386,7 +383,6 @@ export default function QuizPage() {
                 })}
               </div>
 
-              {/* Explanation */}
               <AnimatePresence>
                 {confirmed && (
                   <motion.div
@@ -411,7 +407,6 @@ export default function QuizPage() {
                 )}
               </AnimatePresence>
 
-              {/* Buttons */}
               <div className="mt-5 flex gap-3">
                 {!confirmed && (
                   <button
@@ -434,7 +429,6 @@ export default function QuizPage() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Answer trail */}
           <div className="mt-4 flex flex-wrap justify-center gap-1.5">
             {quizQuestions.map((_, i) => {
               const ans = answers[i];
@@ -468,7 +462,6 @@ export default function QuizPage() {
     const myScore = score;
     const myRank = ranking.findIndex((r) => r.name === playerName && r.score === myScore) + 1;
 
-
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-yellow-50 p-4">
         <div className="mx-auto max-w-lg">
@@ -478,7 +471,6 @@ export default function QuizPage() {
             transition={{ type: "spring", duration: 0.6 }}
             className="rounded-3xl bg-white p-8 shadow-2xl text-center"
           >
-            {/* Trophy */}
             <motion.div
               animate={{ rotate: [0, -10, 10, -10, 0] }}
               transition={{ delay: 0.5, duration: 0.5 }}
@@ -492,18 +484,16 @@ export default function QuizPage() {
               {playerEmoji} {playerName}
             </p>
 
-            {/* Score */}
             <div className="mb-6 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 p-5 text-white">
               <div className="font-['Fredoka_One'] text-5xl">{myScore}</div>
               <div className="font-['Nunito'] text-sm font-bold text-white/80">pontos totais</div>
-              {myRank <= 3 && (
+              {myRank > 0 && myRank <= 3 && (
                 <div className="mt-2 rounded-full bg-white/30 px-4 py-1 font-['Nunito'] text-sm font-black">
                   {myRank === 1 ? "🥇" : myRank === 2 ? "🥈" : "🥉"} #{myRank} no Ranking!
                 </div>
               )}
             </div>
 
-            {/* Stats */}
             <div className="mb-6 grid grid-cols-3 gap-3">
               <div className="rounded-2xl bg-green-100 p-3 text-center">
                 <div className="font-['Fredoka_One'] text-2xl text-green-600">{correct}</div>
@@ -519,7 +509,6 @@ export default function QuizPage() {
               </div>
             </div>
 
-            {/* Answers detail */}
             <div className="mb-6 max-h-48 overflow-y-auto rounded-2xl bg-gray-50 p-3">
               {quizQuestions.map((q, i) => (
                 <div key={i} className="mb-2 flex items-center gap-2 text-left">
@@ -639,4 +628,4 @@ export default function QuizPage() {
   }
 
   return null;
-}
+        }
