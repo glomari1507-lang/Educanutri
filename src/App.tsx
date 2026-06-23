@@ -6,6 +6,8 @@ import AboutPage from "./pages/AboutPage";
 import FoodsPage from "./pages/FoodsPage";
 import MythsPage from "./pages/MythsPage";
 import QuizPage from "./pages/QuizPage";
+import LoginPage from "./pages/LoginPage";
+import FriendsPage from "./pages/FriendsPage";
 
 export default function App() {
   return (
@@ -19,6 +21,8 @@ export default function App() {
             <Route path="/alimentos" element={<FoodsPage />} />
             <Route path="/mitos" element={<MythsPage />} />
             <Route path="/quiz" element={<QuizPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/amigos" element={<FriendsPage />} />
           </Routes>
         </main>
         <Footer />
