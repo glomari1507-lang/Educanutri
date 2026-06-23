@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { 
-  getFriendsRanking, 
-  getPendingRequests,
-  sendFriendRequest,
-  acceptFriendRequest,
-  searchUsers 
-} from '../lib/ranking';
 
 type Profile = {
   id: string;
@@ -19,13 +12,13 @@ type Profile = {
 export default function FriendsPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
-  const [friendsList, setFriendsList] = useState<Profile[]>([]);
-  const [friendsRanking, setFriendsRanking] = useState<Profile[]>([]);
+  const [friends, setFriends] = useState<Profile[]>([]);
+  const [ranking, setRanking] = useState<Profile[]>([]);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
@@ -36,15 +29,13 @@ export default function FriendsPage() {
           return;
         }
         setUser(data.user);
-
         await Promise.all([
           loadFriends(data.user.id),
-          loadFriendsRanking(data.user.id),
-          loadPendingRequests(data.user.id)
+          loadPendingRequests(data.user.id),
+          loadRanking()
         ]);
-      } catch (err) {
-        console.error('Erro ao carregar dados:', err);
-        setError('Erro ao carregar amigos. Tente novamente.');
+      } catch (err: any) {
+        setError(err.message || 'Erro ao carregar dados');
       } finally {
         setLoading(false);
       }
@@ -53,94 +44,119 @@ export default function FriendsPage() {
   }, []);
 
   const loadFriends = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('friends')
-        .select(`
-          friend_id,
-          profiles!friends_friend_id_fkey (id, username, avatar_url, score)
-        `)
-        .eq('user_id', userId)
-        .eq('status', 'accepted');
-      if (error) throw error;
+    // Busca amigos onde o usuário é o user_id
+    const { data, error } = await supabase
+      .from('friends')
+      .select('friend_id')
+      .eq('user_id', userId)
+      .eq('status', 'accepted');
 
-      const { data: data2, error: error2 } = await supabase
-        .from('friends')
-        .select(`
-          user_id,
-          profiles!friends_user_id_fkey (id, username, avatar_url, score)
-        `)
-        .eq('friend_id', userId)
-        .eq('status', 'accepted');
-      if (error2) throw error2;
+    if (error) throw new Error(error.message);
 
-      const friends = data?.map(f => f.profiles).filter(Boolean) || [];
-      const friends2 = data2?.map(f => f.profiles).filter(Boolean) || [];
-      setFriendsList([...friends, ...friends2]);
-    } catch (err) {
-      console.error('Erro ao carregar amigos:', err);
-      setError('Erro ao carregar lista de amigos.');
+    // Busca amigos onde o usuário é o friend_id
+    const { data: data2, error: error2 } = await supabase
+      .from('friends')
+      .select('user_id')
+      .eq('friend_id', userId)
+      .eq('status', 'accepted');
+
+    if (error2) throw new Error(error2.message);
+
+    // Junta os IDs
+    const friendIds = [
+      ...(data?.map(f => f.friend_id) || []),
+      ...(data2?.map(f => f.user_id) || [])
+    ];
+
+    if (friendIds.length === 0) {
+      setFriends([]);
+      return;
     }
-  };
 
-  const loadFriendsRanking = async (userId: string) => {
-    try {
-      const data = await getFriendsRanking(userId);
-      setFriendsRanking(data);
-    } catch (err) {
-      console.error('Erro ao carregar ranking:', err);
-      setError('Erro ao carregar ranking de amigos.');
-    }
+    // Busca os perfis desses IDs
+    const { data: profiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, username, avatar_url, score')
+      .in('id', friendIds);
+
+    if (profileError) throw new Error(profileError.message);
+    setFriends(profiles || []);
   };
 
   const loadPendingRequests = async (userId: string) => {
-    try {
-      const data = await getPendingRequests(userId);
-      setPendingRequests(data);
-    } catch (err) {
-      console.error('Erro ao carregar solicitações:', err);
-      setError('Erro ao carregar solicitações pendentes.');
-    }
+    const { data, error } = await supabase
+      .from('friends')
+      .select(`
+        id,
+        user_id,
+        profiles:user_id (id, username, avatar_url)
+      `)
+      .eq('friend_id', userId)
+      .eq('status', 'pending');
+
+    if (error) throw new Error(error.message);
+    setPendingRequests(data || []);
+  };
+
+  const loadRanking = async () => {
+    // Ranking global (top 10)
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, username, avatar_url, score')
+      .order('score', { ascending: false })
+      .limit(10);
+
+    if (error) throw new Error(error.message);
+    setRanking(data || []);
   };
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     try {
-      const results = await searchUsers(searchQuery);
-      const friendIds = friendsList.map(f => f.id);
-      const filtered = results.filter(r => r.id !== user.id && !friendIds.includes(r.id));
-      setSearchResults(filtered);
-      if (filtered.length === 0) {
-        alert('Nenhum usuário encontrado com esse nome.');
-      }
-    } catch (err) {
-      console.error('Erro na busca:', err);
-      alert('Erro ao buscar usuários.');
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, username, avatar_url')
+        .ilike('username', `%${searchQuery}%`)
+        .limit(10);
+
+      if (error) throw error;
+      const friendIds = friends.map(f => f.id);
+      setSearchResults((data || []).filter(p => p.id !== user.id && !friendIds.includes(p.id)));
+    } catch (err: any) {
+      alert('Erro na busca: ' + err.message);
     }
   };
 
-  const handleSendRequest = async (friendId: string) => {
+  const sendRequest = async (friendId: string) => {
     try {
-      await sendFriendRequest(user.id, friendId);
+      await supabase.from('friends').insert({
+        user_id: user.id,
+        friend_id: friendId,
+        status: 'pending'
+      });
       alert('Solicitação enviada! ✅');
       setSearchResults([]);
       setSearchQuery('');
     } catch (err: any) {
-      alert('Erro: ' + err.message);
+      alert('Erro ao enviar: ' + err.message);
     }
   };
 
-  const handleAcceptRequest = async (requestId: string) => {
+  const acceptRequest = async (requestId: string) => {
     try {
-      await acceptFriendRequest(requestId);
-      await Promise.all([
-        loadPendingRequests(user.id),
-        loadFriends(user.id),
-        loadFriendsRanking(user.id)
-      ]);
+      await supabase
+        .from('friends')
+        .update({ status: 'accepted' })
+        .eq('id', requestId);
+
       alert('Amigo adicionado! 🎉');
+      await Promise.all([
+        loadFriends(user.id),
+        loadPendingRequests(user.id),
+        loadRanking()
+      ]);
     } catch (err: any) {
-      alert('Erro: ' + err.message);
+      alert('Erro ao aceitar: ' + err.message);
     }
   };
 
@@ -149,85 +165,73 @@ export default function FriendsPage() {
     navigate('/login');
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50">
-        <div className="text-center">
-          <div className="text-4xl animate-spin mb-4">⏳</div>
-          <p className="text-gray-500 font-['Nunito']">Carregando amigos...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">⏳ Carregando...</div>
+    </div>
+  );
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-4">
-        <div className="bg-white rounded-3xl p-8 shadow-xl text-center max-w-md">
-          <div className="text-5xl mb-4">⚠️</div>
-          <h2 className="font-['Fredoka_One'] text-xl text-red-600 mb-2">Ops!</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-purple-600 text-white px-6 py-2 rounded-xl font-bold"
-          >
-            Tentar novamente
-          </button>
-        </div>
+  if (error) return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl p-8 shadow-xl text-center max-w-md">
+        <div className="text-5xl mb-4">⚠️</div>
+        <h2 className="font-['Fredoka_One'] text-xl text-red-600">Ops!</h2>
+        <p className="text-gray-600 mb-4">{error}</p>
+        <button onClick={() => window.location.reload()} className="bg-purple-600 text-white px-6 py-2 rounded-xl font-bold">
+          Tentar novamente
+        </button>
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="font-['Fredoka_One'] text-3xl text-gray-800">👥 Amigos</h1>
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm"
-          >
+          <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm">
             Sair
           </button>
         </div>
 
+        {/* Lista de amigos */}
         <div className="bg-white rounded-3xl p-6 shadow-lg mb-6">
           <h2 className="font-['Fredoka_One'] text-xl text-gray-700 mb-4">
-            👫 Meus Amigos ({friendsList.length})
+            👫 Meus Amigos ({friends.length})
           </h2>
-          {friendsList.length === 0 ? (
+          {friends.length === 0 ? (
             <p className="text-gray-500">Você ainda não tem amigos. Adicione usando a busca abaixo!</p>
           ) : (
-            <div className="space-y-2">
-              {friendsList.map((friend) => (
-                <div key={friend.id} className="flex items-center gap-3 py-2 border-b border-gray-100">
-                  <span className="text-2xl">{friend.avatar_url || '👤'}</span>
-                  <span className="font-bold flex-1">{friend.username}</span>
-                  <span className="font-['Fredoka_One'] text-purple-600">{friend.score || 0}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="bg-white rounded-3xl p-6 shadow-lg mb-6">
-          <h2 className="font-['Fredoka_One'] text-xl text-gray-700 mb-4">
-            🏅 Ranking entre Amigos
-          </h2>
-          {friendsRanking.length === 0 ? (
-            <p className="text-gray-500">Adicione amigos para ver o ranking!</p>
-          ) : (
-            friendsRanking.map((friend, i) => (
-              <div key={friend.id} className="flex items-center gap-3 py-2 border-b border-gray-100">
-                <span className="font-bold text-gray-400 w-8">#{i + 1}</span>
-                <span className="text-2xl">{friend.avatar_url || '👤'}</span>
-                <span className="font-bold flex-1">{friend.username}</span>
-                <span className="font-['Fredoka_One'] text-purple-600">{friend.score || 0}</span>
+            friends.map((f) => (
+              <div key={f.id} className="flex items-center gap-3 py-2 border-b border-gray-100">
+                <span className="text-2xl">{f.avatar_url || '👤'}</span>
+                <span className="font-bold flex-1">{f.username}</span>
+                <span className="font-['Fredoka_One'] text-purple-600">{f.score || 0}</span>
               </div>
             ))
           )}
         </div>
 
+        {/* Ranking global */}
+        <div className="bg-white rounded-3xl p-6 shadow-lg mb-6">
+          <h2 className="font-['Fredoka_One'] text-xl text-gray-700 mb-4">
+            🏅 Ranking Geral (Top 10)
+          </h2>
+          {ranking.length === 0 ? (
+            <p className="text-gray-500">Nenhuma pontuação registrada ainda.</p>
+          ) : (
+            ranking.map((p, i) => (
+              <div key={p.id} className="flex items-center gap-3 py-2 border-b border-gray-100">
+                <span className="font-bold text-gray-400 w-8">#{i + 1}</span>
+                <span className="text-2xl">{p.avatar_url || '👤'}</span>
+                <span className="font-bold flex-1">{p.username}</span>
+                <span className="font-['Fredoka_One'] text-purple-600">{p.score || 0}</span>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Busca */}
         <div className="bg-white rounded-3xl p-6 shadow-lg mb-6">
           <h2 className="font-['Fredoka_One'] text-xl text-gray-700 mb-4">
             🔍 Adicionar Amigos
@@ -235,30 +239,24 @@ export default function FriendsPage() {
           <div className="flex gap-2">
             <input
               type="text"
-              placeholder="Buscar pelo nome do amigo..."
+              placeholder="Buscar pelo nome..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 rounded-2xl border-2 border-purple-200 px-4 py-2 outline-none focus:border-purple-500"
             />
-            <button
-              onClick={handleSearch}
-              className="bg-purple-600 text-white px-4 py-2 rounded-2xl font-bold"
-            >
+            <button onClick={handleSearch} className="bg-purple-600 text-white px-4 py-2 rounded-2xl font-bold">
               Buscar
             </button>
           </div>
           {searchResults.length > 0 && (
             <div className="mt-4 space-y-2">
-              {searchResults.map((user) => (
-                <div key={user.id} className="flex items-center justify-between py-2 border-b border-gray-100">
+              {searchResults.map((u) => (
+                <div key={u.id} className="flex items-center justify-between py-2 border-b border-gray-100">
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl">{user.avatar_url || '👤'}</span>
-                    <span className="font-bold">{user.username}</span>
+                    <span className="text-2xl">{u.avatar_url || '👤'}</span>
+                    <span className="font-bold">{u.username}</span>
                   </div>
-                  <button
-                    onClick={() => handleSendRequest(user.id)}
-                    className="bg-green-500 text-white px-3 py-1 rounded-xl text-sm font-bold"
-                  >
+                  <button onClick={() => sendRequest(u.id)} className="bg-green-500 text-white px-3 py-1 rounded-xl text-sm font-bold">
                     + Adicionar
                   </button>
                 </div>
@@ -267,6 +265,7 @@ export default function FriendsPage() {
           )}
         </div>
 
+        {/* Solicitações pendentes */}
         {pendingRequests.length > 0 && (
           <div className="bg-white rounded-3xl p-6 shadow-lg">
             <h2 className="font-['Fredoka_One'] text-xl text-gray-700 mb-4">
@@ -278,10 +277,7 @@ export default function FriendsPage() {
                   <span className="text-2xl">{req.profiles?.avatar_url || '👤'}</span>
                   <span className="font-bold">{req.profiles?.username || 'Usuário'}</span>
                 </div>
-                <button
-                  onClick={() => handleAcceptRequest(req.id)}
-                  className="bg-purple-600 text-white px-4 py-1 rounded-xl font-bold"
-                >
+                <button onClick={() => acceptRequest(req.id)} className="bg-purple-600 text-white px-4 py-1 rounded-xl font-bold">
                   Aceitar
                 </button>
               </div>
@@ -291,4 +287,4 @@ export default function FriendsPage() {
       </div>
     </div>
   );
-  }
+                }
