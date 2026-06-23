@@ -18,21 +18,47 @@ export default function Navbar() {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-      if (data.user) {
+      // Pega a sessão atual (persistente)
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUser = session?.user || null;
+      setUser(currentUser);
+
+      if (currentUser) {
         const { data: profileData } = await supabase
           .from('profiles')
-          .select('avatar_url, username')
-          .eq('id', data.user.id)
+          .select('username, avatar_url')
+          .eq('id', currentUser.id)
           .single();
         setProfile(profileData);
       }
+      setLoading(false);
     };
+
     getUser();
+
+    // Escuta mudanças na autenticação (login/logout em outras abas)
+    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const currentUser = session?.user || null;
+      setUser(currentUser);
+      if (currentUser) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('username, avatar_url')
+          .eq('id', currentUser.id)
+          .single();
+        setProfile(profileData);
+      } else {
+        setProfile(null);
+      }
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -41,6 +67,22 @@ export default function Navbar() {
     setProfile(null);
     navigate('/');
   };
+
+  if (loading) {
+    return (
+      <nav className="sticky top-0 z-50 border-b-2 border-purple-200 bg-white/90 shadow-sm backdrop-blur-md">
+        <div className="mx-auto max-w-5xl px-4">
+          <div className="flex h-14 items-center justify-between">
+            <button className="flex items-center gap-2 font-['Fredoka_One'] text-xl text-purple-700">
+              <span className="text-2xl">🍬</span>
+              <span>SugarAlert</span>
+            </button>
+            <div className="h-8 w-8 animate-pulse rounded-full bg-purple-200" />
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="sticky top-0 z-50 border-b-2 border-purple-200 bg-white/90 shadow-sm backdrop-blur-md">
@@ -113,6 +155,7 @@ export default function Navbar() {
             )}
           </div>
 
+          {/* Mobile */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 rounded-xl bg-purple-100 md:hidden"
