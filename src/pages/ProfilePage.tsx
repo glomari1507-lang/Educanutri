@@ -49,8 +49,7 @@ export default function ProfilePage() {
       .upsert({
         id: user.id,
         username: username.trim(),
-        avatar_url: avatar,
-        updated_at: new Date().toISOString()
+        avatar_url: avatar
       });
 
     if (error) {
@@ -125,4 +124,4 @@ export default function ProfilePage() {
       </div>
     </div>
   );
-    }
+}
