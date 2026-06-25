@@ -22,7 +22,6 @@ export default function Navbar() {
 
   useEffect(() => {
     const getUser = async () => {
-      // Pega a sessão atual (persistente)
       const { data: { session } } = await supabase.auth.getSession();
       const currentUser = session?.user || null;
       setUser(currentUser);
@@ -40,7 +39,6 @@ export default function Navbar() {
 
     getUser();
 
-    // Escuta mudanças na autenticação (login/logout em outras abas)
     const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
       const currentUser = session?.user || null;
       setUser(currentUser);
@@ -74,8 +72,8 @@ export default function Navbar() {
         <div className="mx-auto max-w-5xl px-4">
           <div className="flex h-14 items-center justify-between">
             <button className="flex items-center gap-2 font-['Fredoka_One'] text-xl text-purple-700">
-              <span className="text-2xl">🍬</span>
-              <span>SugarAlert</span>
+              <span className="text-2xl">🍎</span>
+              <span>EducaNutri</span>
             </button>
             <div className="h-8 w-8 animate-pulse rounded-full bg-purple-200" />
           </div>
@@ -92,8 +90,8 @@ export default function Navbar() {
             onClick={() => navigate("/")}
             className="flex items-center gap-2 font-['Fredoka_One'] text-xl text-purple-700 hover:text-pink-600"
           >
-            <span className="text-2xl">🍬</span>
-            <span>SugarAlert</span>
+            <span className="text-2xl">🍎</span>
+            <span>EducaNutri</span>
           </button>
 
           <div className="hidden items-center gap-1 md:flex">
@@ -155,7 +153,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 rounded-xl bg-purple-100 md:hidden"
@@ -210,4 +207,4 @@ export default function Navbar() {
       </div>
     </nav>
   );
-}
+                }
