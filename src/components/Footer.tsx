@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="mb-6 grid gap-6 sm:grid-cols-3">
           <div>
             <div className="mb-2 flex items-center gap-2 font-['Fredoka_One'] text-xl text-purple-700">
-              <span>🍬</span> SugarAlert
+              <span>🍎</span> EducaNutri
             </div>
             <p className="font-['Nunito'] text-xs font-semibold text-gray-500">
               Educação nutricional de forma divertida para crianças e adolescentes.
@@ -53,7 +53,7 @@ export default function Footer() {
         </div>
         <div className="border-t border-gray-100 pt-4 text-center">
           <p className="font-['Nunito'] text-xs font-semibold text-gray-400">
-            🍎 SugarAlert – Feito com ❤️ para educar crianças e adolescentes sobre alimentação saudável.
+            🍎 EducaNutri – Feito com ❤️ para educar crianças e adolescentes sobre alimentação saudável.
           </p>
         </div>
       </div>
