@@ -45,7 +45,7 @@ export default function QuizPage() {
   const [confirmed, setConfirmed] = useState(false);
   const [score, setScore] = useState(0);
   const [answers, setAnswers] = useState<{ correct: boolean; points: number }[]>([]);
-  const [timeLeft, setTimeLeft] = useState(20);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -62,7 +62,7 @@ export default function QuizPage() {
 
   useEffect(() => {
     if (gameState === "playing" && !confirmed) {
-      setTimeLeft(20);
+      setTimeLeft(30);
       timerRef.current = setInterval(() => {
         setTimeLeft((t) => {
           if (t <= 1) {
@@ -95,7 +95,7 @@ export default function QuizPage() {
     setConfirmed(true);
     const q = quizQuestions[currentQ];
     const isCorrect = selected === q.correct;
-    const bonus = Math.floor((timeLeft / 20) * 50);
+    const bonus = Math.floor((timeLeft / 30) * 50);
     const pts = isCorrect ? POINTS[q.difficulty] + bonus : 0;
     const newScore = score + pts;
     setScore(newScore);
@@ -201,7 +201,7 @@ export default function QuizPage() {
               <ul className="space-y-1.5">
                 {[
                   "São 15 perguntas sobre o açúcar",
-                  "Você tem 20 segundos por pergunta",
+                  "Você tem 30 segundos por pergunta",
                   "Responder mais rápido = mais pontos!",
                   "Pergunta Fácil: até 150 pts",
                   "Pergunta Média: até 200 pts",
@@ -269,10 +269,10 @@ export default function QuizPage() {
         </motion.div>
       </div>
     );
-            }
+  }
     // Playing Screen
   if (gameState === "playing") {
-    const timerPct = (timeLeft / 20) * 100;
+    const timerPct = (timeLeft / 30) * 100;
     const timerColor = timerPct > 60 ? "bg-green-500" : timerPct > 30 ? "bg-yellow-500" : "bg-red-500";
 
     return (
@@ -628,4 +628,4 @@ export default function QuizPage() {
   }
 
   return null;
-        }
+}
