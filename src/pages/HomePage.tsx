@@ -40,7 +40,6 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
       {/* Hero */}
       <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 pb-16 pt-10">
-        {/* Decorative circles */}
         <div className="absolute -top-10 -left-10 h-40 w-40 rounded-full bg-white/10" />
         <div className="absolute -top-5 right-20 h-20 w-20 rounded-full bg-white/10" />
         <div className="absolute bottom-0 right-0 h-60 w-60 rounded-full bg-white/10" />
@@ -53,7 +52,7 @@ export default function HomePage() {
             transition={{ type: "spring", duration: 0.6 }}
             className="mb-4 inline-block text-7xl"
           >
-            🍬
+            🍎
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
@@ -61,7 +60,7 @@ export default function HomePage() {
             transition={{ delay: 0.2 }}
             className="mb-3 font-['Fredoka_One'] text-5xl font-bold text-white drop-shadow-lg md:text-6xl"
           >
-            SugarAlert!
+            EducaNutri!
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -92,7 +91,6 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* Wave */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 60L60 48C120 36 240 12 360 6C480 0 600 12 720 24C840 36 960 48 1080 48C1200 48 1320 36 1380 30L1440 24V60H0Z" fill="#faf5ff" />
@@ -164,7 +162,6 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Quick fact */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
