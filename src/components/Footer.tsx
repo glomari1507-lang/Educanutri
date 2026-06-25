@@ -40,13 +40,34 @@ export default function Footer() {
             <h4 className="mb-2 font-['Fredoka_One'] text-base text-gray-700">Saiba Mais</h4>
             <ul className="space-y-1">
               <li>
-                <span className="font-['Nunito'] text-xs font-semibold text-gray-400">🌍 OMS – Organização Mundial da Saúde</span>
+                <a
+                  href="https://www.who.int/news-room/fact-sheets/detail/healthy-diet"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-['Nunito'] text-xs font-semibold text-gray-400 hover:text-purple-600 hover:underline"
+                >
+                  🌍 OMS – Organização Mundial da Saúde
+                </a>
               </li>
               <li>
-                <span className="font-['Nunito'] text-xs font-semibold text-gray-400">🇧🇷 Ministério da Saúde do Brasil</span>
+                <a
+                  href="https://www.gov.br/saude"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-['Nunito'] text-xs font-semibold text-gray-400 hover:text-purple-600 hover:underline"
+                >
+                  🇧🇷 Ministério da Saúde do Brasil
+                </a>
               </li>
               <li>
-                <span className="font-['Nunito'] text-xs font-semibold text-gray-400">📚 Guia Alimentar Brasileiro</span>
+                <a
+                  href="https://bvsms.saude.gov.br/bvs/publicacoes/guia_alimentar_populacao_brasileira_2ed.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-['Nunito'] text-xs font-semibold text-gray-400 hover:text-purple-600 hover:underline"
+                >
+                  📚 Guia Alimentar Brasileiro
+                </a>
               </li>
             </ul>
           </div>
