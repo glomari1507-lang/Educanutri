@@ -3,10 +3,22 @@ import { useNavigate } from "react-router-dom";
 export default function Footer() {
   const navigate = useNavigate();
 
+  const creators = [
+    "Geovana Leocádio",
+    "Geane Sousa",
+    "Maria Rita Paulo",
+    "Yuri Silva",
+    "Thayssa Campos",
+    "Glória Maria Almeida",
+    "Gustavo de Oliveira",
+    "Rebeca Viana",
+  ];
+
   return (
     <footer className="mt-12 border-t-2 border-purple-100 bg-white pb-6 pt-8">
-      <div className="mx-auto max-w-4xl px-4">
-        <div className="mb-6 grid gap-6 sm:grid-cols-3">
+      <div className="mx-auto max-w-5xl px-4">
+        <div className="mb-6 grid gap-6 sm:grid-cols-2 md:grid-cols-4">
+          {/* Sobre */}
           <div>
             <div className="mb-2 flex items-center gap-2 font-['Fredoka_One'] text-xl text-purple-700">
               <span>🍎</span> EducaNutri
@@ -15,6 +27,8 @@ export default function Footer() {
               Educação nutricional de forma divertida para crianças e adolescentes.
             </p>
           </div>
+
+          {/* Explore */}
           <div>
             <h4 className="mb-2 font-['Fredoka_One'] text-base text-gray-700">Explore</h4>
             <ul className="space-y-1">
@@ -36,6 +50,8 @@ export default function Footer() {
               ))}
             </ul>
           </div>
+
+          {/* Saiba Mais */}
           <div>
             <h4 className="mb-2 font-['Fredoka_One'] text-base text-gray-700">Saiba Mais</h4>
             <ul className="space-y-1">
@@ -71,7 +87,20 @@ export default function Footer() {
               </li>
             </ul>
           </div>
+
+          {/* Criadores */}
+          <div>
+            <h4 className="mb-2 font-['Fredoka_One'] text-base text-gray-700">👩‍🏫 Criadores</h4>
+            <ul className="grid grid-cols-2 gap-x-3 gap-y-0.5">
+              {creators.map((name) => (
+                <li key={name} className="font-['Nunito'] text-xs font-semibold text-gray-500">
+                  {name}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
+
         <div className="border-t border-gray-100 pt-4 text-center">
           <p className="font-['Nunito'] text-xs font-semibold text-gray-400">
             🍎 EducaNutri – Feito com ❤️ para educar crianças e adolescentes sobre alimentação saudável.
@@ -80,4 +109,4 @@ export default function Footer() {
       </div>
     </footer>
   );
-}
+            }
