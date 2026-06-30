@@ -22,13 +22,28 @@ export const quizQuestions = [
     difficulty: "Médio",
     question: "Qual alimento pode conter açúcar adicionado mesmo sem ter sabor doce?",
     options: [
-      { id: "a", text: "Pão de forma industrializado" },
+      { id: "a", text: "Feijão cozido" },
       { id: "b", text: "Ketchup" },
       { id: "c", text: "Queijo minas" },
       { id: "d", text: "Aveia em flocos" },
     ],
     correct: "b",
-    explanation: "O ketchup costuma receber açúcar durante sua fabricação para equilibrar a acidez do tomate e realçar o sabor.",
+    explanation: "O ketchup costuma receber açúcar durante sua fabricação para equilibrar a acidez do tomate e realçar o sabor. (Pães industrializados, molhos prontos e temperos também podem ter açúcar escondido – por isso é importante ler os rótulos!)",
+  },
+  {
+    id: 3,
+    category: "Rótulos",
+    emoji: "📋",
+    difficulty: "Médio",
+    question: "Ao comparar dois produtos semelhantes, qual informação ajuda mais a identificar o mais saudável?",
+    options: [
+      { id: "a", text: "A cor da embalagem" },
+      { id: "b", text: "A lista de ingredientes e a tabela nutricional" },
+      { id: "c", text: "O preço" },
+      { id: "d", text: "O tamanho da embalagem" },
+    ],
+    correct: "b",
+    explanation: "A lista de ingredientes mostra o que compõe o alimento, enquanto a tabela nutricional informa a quantidade de nutrientes, incluindo açúcares.",
   },
   {
     id: 4,
@@ -44,53 +59,6 @@ export const quizQuestions = [
     ],
     correct: "a",
     explanation: "O iogurte natural geralmente não recebe açúcar adicionado, ao contrário das versões saborizadas.",
-  },
-  {
-    id: 7,
-    category: "Alimentos",
-    emoji: "🍪",
-    difficulty: "Fácil",
-    question: "Qual alimento costuma ser ultraprocessado?",
-    options: [
-      { id: "a", text: "Milho cozido" },
-      { id: "b", text: "Biscoito recheado" },
-      { id: "c", text: "Ovo cozido" },
-      { id: "d", text: "Batata-doce assada" },
-    ],
-    correct: "b",
-    explanation: "Biscoitos recheados passam por diversas etapas industriais e contêm ingredientes como açúcares, gorduras e aditivos.",
-  },
-  {
-    id: 13,
-    category: "Nutrição",
-    emoji: "⚡",
-    difficulty: "Médio",
-    question: "Qual é a principal função do açúcar no organismo?",
-    options: [
-      { id: "a", text: "Fornecer energia" },
-      { id: "b", text: "Fortalecer os ossos" },
-      { id: "c", text: "Produzir vitaminas" },
-      { id: "d", text: "Melhorar a digestão" },
-    ],
-    correct: "a",
-    explanation: "O açúcar é um carboidrato que serve como fonte de energia para as células. O problema está no consumo em excesso, principalmente de açúcares adicionados.",
-  },
-
-  // ======================== RÓTULOS E INGREDIENTES ========================
-  {
-    id: 3,
-    category: "Rótulos",
-    emoji: "📋",
-    difficulty: "Médio",
-    question: "Ao comparar dois produtos semelhantes, qual informação ajuda mais a identificar o mais saudável?",
-    options: [
-      { id: "a", text: "A cor da embalagem" },
-      { id: "b", text: "A lista de ingredientes e a tabela nutricional" },
-      { id: "c", text: "O preço" },
-      { id: "d", text: "O tamanho da embalagem" },
-    ],
-    correct: "b",
-    explanation: "A lista de ingredientes mostra o que compõe o alimento, enquanto a tabela nutricional informa a quantidade de nutrientes, incluindo açúcares.",
   },
   {
     id: 5,
@@ -123,6 +91,51 @@ export const quizQuestions = [
     explanation: "Os ingredientes são listados em ordem decrescente de quantidade. O primeiro é o que está presente em maior proporção.",
   },
   {
+    id: 7,
+    category: "Alimentos",
+    emoji: "🍪",
+    difficulty: "Fácil",
+    question: "Qual alimento costuma ser ultraprocessado?",
+    options: [
+      { id: "a", text: "Milho cozido" },
+      { id: "b", text: "Biscoito recheado" },
+      { id: "c", text: "Ovo cozido" },
+      { id: "d", text: "Batata-doce assada" },
+    ],
+    correct: "b",
+    explanation: "Biscoitos recheados passam por diversas etapas industriais e contêm ingredientes como açúcares, gorduras e aditivos.",
+  },
+  {
+    id: 8,
+    category: "Nutrição",
+    emoji: "🍏",
+    difficulty: "Fácil",
+    question: "Qual lanche tende a proporcionar maior saciedade?",
+    options: [
+      { id: "a", text: "Barra de chocolate" },
+      { id: "b", text: "Maçã com castanhas" },
+      { id: "c", text: "Bala de goma" },
+      { id: "d", text: "Refrigerante zero" },
+    ],
+    correct: "b",
+    explanation: "A combinação de fibras e gorduras boas ajuda a prolongar a sensação de saciedade.",
+  },
+  {
+    id: 9,
+    category: "Nutrição",
+    emoji: "🥛",
+    difficulty: "Fácil",
+    question: "A lactose é:",
+    options: [
+      { id: "a", text: "Um tipo de gordura." },
+      { id: "b", text: "O açúcar natural do leite." },
+      { id: "c", text: "Um adoçante artificial." },
+      { id: "d", text: "Uma vitamina." },
+    ],
+    correct: "b",
+    explanation: "A lactose é um carboidrato naturalmente presente no leite e em seus derivados.",
+  },
+  {
     id: 10,
     category: "Rótulos",
     emoji: "🏷️",
@@ -137,23 +150,6 @@ export const quizQuestions = [
     correct: "b",
     explanation: "Frutas e leite, por exemplo, possuem açúcares naturais, mesmo quando não há açúcar adicionado.",
   },
-  {
-    id: 17,
-    category: "Rótulos",
-    emoji: "🏷️",
-    difficulty: "Difícil",
-    question: 'Um alimento com a indicação "diet" é sempre livre de açúcar?',
-    options: [
-      { id: "a", text: "Sim, todo alimento diet não contém açúcar." },
-      { id: "b", text: "Não, um alimento diet pode ser isento de outro nutriente, como sódio ou gordura." },
-      { id: "c", text: "Sim, mas apenas quando é uma bebida." },
-      { id: "d", text: "Não, porque alimentos diet sempre contêm mais açúcar." },
-    ],
-    correct: "b",
-    explanation: 'O termo "diet" indica que o produto teve a retirada ou redução significativa de um nutriente específico, que pode ser o açúcar, mas também pode ser o sódio, a gordura ou outro componente.',
-  },
-
-  // ======================== SAÚDE E CORPO ========================
   {
     id: 11,
     category: "Saúde",
@@ -183,6 +179,21 @@ export const quizQuestions = [
     ],
     correct: "b",
     explanation: "O consumo excessivo de bebidas açucaradas aumenta a ingestão de calorias e está relacionado ao maior risco de obesidade, diabetes tipo 2 e outras doenças crônicas.",
+  },
+  {
+    id: 13,
+    category: "Nutrição",
+    emoji: "⚡",
+    difficulty: "Médio",
+    question: "Qual é a principal função do açúcar no organismo?",
+    options: [
+      { id: "a", text: "Fornecer energia" },
+      { id: "b", text: "Fortalecer os ossos" },
+      { id: "c", text: "Produzir vitaminas" },
+      { id: "d", text: "Melhorar a digestão" },
+    ],
+    correct: "a",
+    explanation: "O açúcar é um carboidrato que serve como fonte de energia para as células. O problema está no consumo em excesso, principalmente de açúcares adicionados.",
   },
   {
     id: 14,
@@ -229,37 +240,20 @@ export const quizQuestions = [
     correct: "a",
     explanation: "O consumo elevado de açúcar pode favorecer alterações na glicemia, aumentando a sede e a vontade de consumir alimentos doces.",
   },
-
-  // ======================== NUTRIÇÃO E HÁBITOS ========================
   {
-    id: 8,
-    category: "Nutrição",
-    emoji: "🍏",
-    difficulty: "Fácil",
-    question: "Qual lanche tende a proporcionar maior saciedade?",
+    id: 17,
+    category: "Rótulos",
+    emoji: "🏷️",
+    difficulty: "Difícil",
+    question: 'Um alimento com a indicação "diet" é sempre livre de açúcar?',
     options: [
-      { id: "a", text: "Barra de chocolate" },
-      { id: "b", text: "Maçã com castanhas" },
-      { id: "c", text: "Bala de goma" },
-      { id: "d", text: "Refrigerante zero" },
+      { id: "a", text: "Sim, todo alimento diet não contém açúcar." },
+      { id: "b", text: "Não, um alimento diet pode ser isento de outro nutriente, como sódio ou gordura." },
+      { id: "c", text: "Sim, mas apenas quando é uma bebida." },
+      { id: "d", text: "Não, porque alimentos diet sempre contêm mais açúcar." },
     ],
     correct: "b",
-    explanation: "A combinação de fibras e gorduras boas ajuda a prolongar a sensação de saciedade.",
-  },
-  {
-    id: 9,
-    category: "Nutrição",
-    emoji: "🥛",
-    difficulty: "Fácil",
-    question: "A lactose é:",
-    options: [
-      { id: "a", text: "Um tipo de gordura." },
-      { id: "b", text: "O açúcar natural do leite." },
-      { id: "c", text: "Um adoçante artificial." },
-      { id: "d", text: "Uma vitamina." },
-    ],
-    correct: "b",
-    explanation: "A lactose é um carboidrato naturalmente presente no leite e em seus derivados.",
+    explanation: 'O termo "diet" indica que o produto teve a retirada ou redução significativa de um nutriente específico, que pode ser o açúcar, mas também pode ser o sódio, a gordura ou outro componente.',
   },
   {
     id: 18,
@@ -308,20 +302,4 @@ export const quizQuestions = [
   },
 ];
 
-// Mantenha as outras exportações (sugarFoods, sugarTypes, myths, healthyTips)
-// Elas não foram alteradas, mas você pode mantê-las ou substituir depois.
-export const sugarFoods = [
-  // ... (mantenha o que já existe ou me avise se quiser atualizar)
-];
-
-export const sugarTypes = [
-  // ...
-];
-
-export const myths = [
-  // ...
-];
-
-export const healthyTips = [
-  // ...
-];
+// ... (mantenha as outras exportações: sugarFoods, sugarTypes, myths, healthyTips)
